@@ -27,10 +27,15 @@ from absl import logging
 import numpy as np
 import tensorflow as tf
 
+import matplotlib as mpl
+import matplotlib.pyplot as plt
+mpl.use('Qt5Agg')
+
+
 FLAGS = flags.FLAGS
 
 flags.DEFINE_integer("epochs", 500, "number of epochs to train the model.")
-flags.DEFINE_string("save_dir", "/tmp/hello_world_models",
+flags.DEFINE_string("save_dir", "/home/flexiv/demo/embedded_ai/tflite_micro/tensorflow/lite/micro/examples/hello_world/hello_world_models",
                     "the directory to save the trained model.")
 flags.DEFINE_boolean("save_tf_model", False,
                      "store the original unconverted tf model.")
@@ -54,7 +59,6 @@ def get_data():
 
   return (x_values, y_values)
 
-
 def create_model() -> tf.keras.Model:
   model = tf.keras.Sequential()
 
@@ -66,6 +70,8 @@ def create_model() -> tf.keras.Model:
   # representations
   model.add(tf.keras.layers.Dense(16, activation='relu'))
 
+  model.add(tf.keras.layers.Dense(16, activation='relu'))
+  
   # Final layer is a single neuron, since we want to output a single value
   model.add(tf.keras.layers.Dense(1))
 
@@ -86,7 +92,6 @@ def convert_tflite_model(model):
   converter = tf.lite.TFLiteConverter.from_keras_model(model)
   tflite_model = converter.convert()
   return tflite_model
-
 
 def save_tflite_model(tflite_model, save_dir, model_name):
   """save the converted tflite model
@@ -117,7 +122,10 @@ def train_model(epochs, x_values, y_values):
             epochs=epochs,
             validation_split=0.2,
             batch_size=64,
-            verbose=2)
+            verbose=2,
+            workers=10,
+            max_queue_size=50,
+            use_multiprocessing=True)
 
   if FLAGS.save_tf_model:
     model.save(FLAGS.save_dir, save_format="tf")
@@ -128,6 +136,7 @@ def train_model(epochs, x_values, y_values):
 
 def main(_):
   x_values, y_values = get_data()
+  
   trained_model = train_model(FLAGS.epochs, x_values, y_values)
 
   # Convert and save the model to .tflite
@@ -135,6 +144,11 @@ def main(_):
   save_tflite_model(tflite_model,
                     FLAGS.save_dir,
                     model_name="hello_world_float.tflite")
+  
+  test_data_x=np.arange(0,math.pi*3,0.01)
+  test_data_y=trained_model.predict(test_data_x)
+  plt.plot(test_data_x,test_data_y,label='raw data')
+  plt.show()
 
 
 if __name__ == "__main__":

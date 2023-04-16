@@ -19,6 +19,11 @@ from absl import flags
 import numpy as np
 import matplotlib.pyplot as plt
 from tensorflow.python.platform import resource_loader
+
+import sys
+sys.path.append('/home/flexiv/demo/embedded_ai')
+print(sys.path)
+
 from tflite_micro.tensorflow.lite.micro.python.interpreter.src import tflm_runtime
 
 _USE_TFLITE_INTERPRETER = flags.DEFINE_bool(
@@ -108,7 +113,7 @@ def get_tflite_prediction(model_path, x_values):
 
 
 def main(_):
-  model_path = os.path.join(_PREFIX_PATH, 'models/hello_world_float.tflite')
+  model_path = os.path.join(_PREFIX_PATH, 'hello_world_float.tflite')
 
   x_values = generate_random_input()
 

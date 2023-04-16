@@ -27,6 +27,7 @@ endef
 # 4 - Model sources and model test inputs in.tflite, .wav, .bmp or .csv format.
 # Calling eval on the output will create the targets that you need.
 define microlite_test
+
 $(1)_LOCAL_SRCS := $(2)
 
 ifneq ($(4),)
